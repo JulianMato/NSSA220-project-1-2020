@@ -151,6 +151,7 @@ echo "SECONDS, CPU%, MEM%" > "APM3_metrics.csv"
 echo "SECONDS, CPU%, MEM%" > "APM4_metrics.csv"
 echo "SECONDS, CPU%, MEM%" > "APM5_metrics.csv"
 echo "SECONDS, CPU%, MEM%" > "APM6_metrics.csv"
+echo "SECONDS, TX, RX, Disk Writes, Free Disk Space" > "sda_metrics.csv"
 
 
 #Clears any duplicate/old processes
