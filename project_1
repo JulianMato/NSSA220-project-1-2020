@@ -146,12 +146,13 @@ cleanup(){
 
 #----Startup----#
 #Clears old Metric Files
-:> "APM1_metrics.csv"
-:> "APM2_metrics.csv"
-:> "APM3_metrics.csv"
-:> "APM4_metrics.csv"
-:> "APM5_metrics.csv"
-:> "APM6_metrics.csv"
+echo "SECONDS, CPU%, MEM%" > "APM1_metrics.csv"
+echo "SECONDS, CPU%, MEM%" > "APM2_metrics.csv"
+echo "SECONDS, CPU%, MEM%" > "APM3_metrics.csv"
+echo "SECONDS, CPU%, MEM%" > "APM4_metrics.csv"
+echo "SECONDS, CPU%, MEM%" > "APM5_metrics.csv"
+echo "SECONDS, CPU%, MEM%" > "APM6_metrics.csv"
+
 
 #Clears any duplicate/old processes
 cleanup
@@ -176,12 +177,12 @@ while true; do
     
     #Log info every 5 seconds
     if [ $N -eq 5 ] ; then
-        prs_metrics "APM1"
-        prs_metrics "APM2"
-        prs_metrics "APM3"
-        prs_metrics "APM4"
-        prs_metrics "APM5"
-        prs_metrics "APM6"
+        prs_metrics "APM1" $SEC
+        prs_metrics "APM2" $SEC
+        prs_metrics "APM3" $SEC
+        prs_metrics "APM4" $SEC
+        prs_metrics "APM5" $SEC
+        prs_metrics "APM6" $SEC
         sys_metrics $SEC
         N=0
     fi
