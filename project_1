@@ -81,11 +81,11 @@ prs_killer(){
 #ARGUMENTS:
 #$1=Process Name
 prs_metrics(){
-    TMP3=$()
+    TMP3=$2
     TMP1=$(ps -aux | grep "$1")
     readarray -t TMP2 <<<"$TMP1"
-    TMP1=$(echo ${TMP2[0]} | awk {'print $10",","%"$3",","%"$4","'})
-    echo $TMP1 >> "$1_metrics.csv"
+    TMP1=$(echo ${TMP2[0]} | awk {'print "%"$3",","%"$4'})
+    echo $TMP3 "," $TMP1 >> "$1_metrics.csv"
 }
 
 
@@ -129,6 +129,20 @@ sys_metrics(){
 	echo $1 "," $txStat "," $rxStat "," $writeStat "," $capStat "," >> "sda_metrics.csv"
 }
 
+
+#NAME:
+#cleanup
+#
+#DESC:
+#Cleans up metric processors
+#
+#ARGUMENTS:
+# N/A
+cleanup(){
+    ifstat_killer
+    prs_killer
+}
+#-----------------#
 
 #----Startup----#
 #Clears old Metric Files
@@ -178,23 +192,6 @@ while true; do
     
 done
 
-#------------------#
-
-
-#----Cleanup----#
-trap cleanup EXIT
-#---------------#
-        prs_metrics "APM5"
-        prs_metrics "APM6"
-
-        N=0
-    fi
-
-    SEC=$(($SEC + 1))
-    N=$(($N + 1))
-    sleep 1
-    
-done
 #------------------#
 
 
