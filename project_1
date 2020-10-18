@@ -14,14 +14,6 @@
 #Directory path for use with launching programs
 DIRECTORY=$(pwd)
 
-#ifstat collection interval
-ISIN=1
-
-#Ip address for APM Calls
-IP=127.0.0.1
-#---------------#
-
-
 #----FUNCTIONS----#
 #NAME:
 #ifstat_Killer
@@ -43,15 +35,16 @@ ifstat_killer(){
 #Starts all of the APM exes
 #
 #ARGUMENTS:
-# N/A
+#$1 = IP address
 #
 prs_spawner(){
-    $DIRECTORY/APM1 "$IP" 2>&1 &
-    $DIRECTORY/APM2 "$IP" 2>&1 &
-    $DIRECTORY/APM3 "$IP" 2>&1 &
-    $DIRECTORY/APM4 "$IP" 2>&1 &
-    $DIRECTORY/APM5 "$IP" 2>&1 &
-    $DIRECTORY/APM6 "$IP" 2>&1 &
+    ifstat -d 1
+    $DIRECTORY/APM1 "$1" 2>&1 &
+    $DIRECTORY/APM2 "$1" 2>&1 &
+    $DIRECTORY/APM3 "$1" 2>&1 &
+    $DIRECTORY/APM4 "$1" 2>&1 &
+    $DIRECTORY/APM5 "$1" 2>&1 &
+    $DIRECTORY/APM6 "$1" 2>&1 &
 }
 
 #NAME:
@@ -94,14 +87,14 @@ get_rx(){
 	activeInter=$(ip addr | awk '/state UP/ {print $2}')
 	activeInter=${activeInter%:*}
 	TMP1=$(ifstat | grep $activeInter)
-	echo $TMP1 | awk {'print $6'}
+	echo $TMP1 | awk {'print $7'}
 }
 
 get_tx(){
 	activeInter=$(ip addr | awk '/state UP/ {print $2}')
 	activeInter=${activeInter%:*}
 	TMP1=$(ifstat | grep $activeInter)
-	echo $TMP1 | awk {'print $8'}
+	echo $TMP1 | awk {'print $9'}
 }
 
 get_writes(){
@@ -141,6 +134,22 @@ cleanup(){
     ifstat_killer
     prs_killer
 }
+trap cleanup EXIT
+
+#NAME:
+#getip
+#
+#DESC:
+#retrieves IP address for specified interface
+#ip -4 = ipv4 address
+#grep -oP = only matching specified pattern
+#
+#ARGUMENTS:
+#$1=interafce 
+getip(){
+    ip -4 addr show $1 | grep -oP '(?<=inet\s)\d+(\.\d+){3}'
+}
+
 #-----------------#
 
 #----Startup----#
@@ -157,45 +166,30 @@ echo "SECONDS, TX, RX, Disk Writes, Free Disk Space" > "sda_metrics.csv"
 #Clears any duplicate/old processes
 cleanup
 
-#Set ifstat sample time
-ifstat -d 1
-#ifstat -d $ISIN 2>&1
-prs_spawner
+IP=$(getip "ens33")
+prs_spawner "$IP"
 #---------------#
 
 
-printf "Type (q/Q) to exit program\n"
-N=0
+
+
+
+
+printf "Please use ctrl + c to exit program\n"
 SEC=0
 while true; do
-    #Exit program loop
-    read -t 1 -N 1 input
-    if [[ $input = "q" ]] || [[ $input = "Q" ]] ; then
-            printf "\nExiting program\n"
-            break
-    fi
     
     #Log info every 5 seconds
-    if [ $N -eq 5 ] ; then
-        prs_metrics "APM1" $SEC
-        prs_metrics "APM2" $SEC
-        prs_metrics "APM3" $SEC
-        prs_metrics "APM4" $SEC
-        prs_metrics "APM5" $SEC
-        prs_metrics "APM6" $SEC
-        sys_metrics $SEC
-        N=0
-    fi
+    prs_metrics "APM1" $SEC
+    prs_metrics "APM2" $SEC
+    prs_metrics "APM3" $SEC
+    prs_metrics "APM4" $SEC
+    prs_metrics "APM5" $SEC
+    prs_metrics "APM6" $SEC
+    sys_metrics $SEC
 
-    SEC=$(($SEC + 1))
-    N=$(($N + 1))
-    sleep 1
+    SEC=$(($SEC + 5))
+    sleep 5
     
 done
 
-#------------------#
-
-
-#----Cleanup----#
-trap cleanup EXIT
-#---------------#
